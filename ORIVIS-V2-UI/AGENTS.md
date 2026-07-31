@@ -1,22 +1,16 @@
 # ORIVIS V2 — Agent Instructions
 
 ## Context
-We are building ORIVIS V2, a full UI redesign of the Orivis platform. V1 (at `ORIVIS V1/`) serves as reference for:
-- **Content & context** — documentation, architecture, API contracts, types
-- **Backend** — NestJS API at `ORIVIS V1/backend/` stays as-is
-- **Design** — completely new, being built from scratch
-
-V2 lives in `v2/` as a **Vite + React SPA**.
+We are building ORIVIS V2, a full UI redesign of the Orivis platform. It is a **Vite + React SPA** living in `ORIVIS-V2-UI/`, consuming a Laravel backend in `../backend/`.
 
 ## Key References
-- `ORIVIS V1/` — Full reference codebase (backend + old frontend)
-- `ORIVIS V1/docs/` — Architecture, database schemas, implementation docs
-- `ORIVIS V1/backend/` — NestJS API (unchanged, we consume it)
-- `ORIVIS V1/frontend/src/types/` — TypeScript interfaces to mirror
-- `ORIVIS V1/frontend/src/constants/api.ts` — API endpoint definitions
-- `ORIVIS V1/frontend/src/constants/routes.ts` — Route definitions
+- `../backend/` — Laravel API (Served at `http://localhost:8000/api/v1`)
+- `../backend/docs/` — Backend architecture and phase summaries
+- `../backend/routes/api.php` → `api_v1.php` — API route definitions
+- `src/constants/api.ts` — API endpoint definitions
+- `src/constants/routes.ts` — Route definitions
 
-## Development Workflow (from V1's 3-Layer Architecture)
+## Development Workflow
 
 **Layer 1 — Directives (`directives/`)**
 SOPs in Markdown defining goals, inputs, outputs, edge cases.

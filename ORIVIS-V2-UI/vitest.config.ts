@@ -14,6 +14,6 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './src/test/setup.ts',
     css: false,
-    exclude: ['**/node_modules/**', '**/ORIVIS V1/**'],
+    exclude: ['**/node_modules/**'],
   },
 })

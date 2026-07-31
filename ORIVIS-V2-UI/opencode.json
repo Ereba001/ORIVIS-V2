@@ -65,7 +65,6 @@
     "bash": "allow",
     "read": "allow",
     "external_directory": {
-      "**/ORIVIS V1/**": "allow",
       "*": "ask"
     }
   },

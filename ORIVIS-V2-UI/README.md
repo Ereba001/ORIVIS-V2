@@ -21,4 +21,4 @@ Output goes to `dist/`.
 
 ## Backend
 
-Consumes the Orivis NestJS API at `http://localhost:3001/api/v1` (configurable via `VITE_API_URL` env var). The backend lives in `ORIVIS V1/backend/`.
+Consumes the Orivis Laravel API at `http://localhost:8000/api/v1` (configurable via `VITE_API_URL` env var). The backend lives in `../backend/`.
