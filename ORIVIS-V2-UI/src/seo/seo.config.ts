@@ -75,11 +75,6 @@ export const pageMeta: Record<string, PageMeta> = {
     description: "Sign in to your ORIVIS account to participate in elections and governance activities.",
     noindex: true,
   },
-  "/signup": {
-    title: "Sign Up | ORIVIS",
-    description: "Create an ORIVIS account to start running secure elections and governance processes for your organization.",
-    noindex: true,
-  },
   "/forgot-password": {
     title: "Forgot Password | ORIVIS",
     description: "Reset your ORIVIS account password.",

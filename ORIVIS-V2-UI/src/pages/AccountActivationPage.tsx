@@ -78,13 +78,13 @@ export default function AccountActivationPage() {
           <AuthStateCard
             state="error"
             title="Activation Failed"
-            message="We couldn't activate your account. The activation link may be invalid or expired. Please try registering again or contact support."
+            message="We couldn't activate your account. The activation link may be invalid or expired. Please contact support for assistance."
             action={
               <button
-                onClick={() => navigate("/platformsignup")}
+                onClick={() => navigate("/platformsignin")}
                 className="bg-brand-gold text-brand-bg-secondary rounded-xl py-2.5 px-6 text-xs font-bold uppercase tracking-widest hover:bg-brand-gold-hover transition-colors cursor-pointer"
               >
-                Create New Account
+                Back to Sign In
               </button>
             }
           />

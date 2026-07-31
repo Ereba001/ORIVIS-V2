@@ -36,7 +36,6 @@ const Terms = lazy(() => import("./pages/Terms"));
 const Results = lazy(() => import("./pages/Results"));
 const SignInPage = lazy(() => import("./pages/SignInPage"));
 const OrgSignInPage = lazy(() => import("./pages/OrgSignInPage"));
-const SignUpPage = lazy(() => import("./pages/SignUpPage"));
 const ForgotPasswordPage = lazy(() => import("./pages/ForgotPasswordPage"));
 const ResetPasswordPage = lazy(() => import("./pages/ResetPasswordPage"));
 const EmailVerificationPage = lazy(() => import("./pages/EmailVerificationPage"));
@@ -122,9 +121,8 @@ export default function App() {
           </Route>
 
           <Route path="/platformsignin" element={<SuspenseWrapper><SignInPage /></SuspenseWrapper>} />
-          <Route path="/platformsignup" element={<SuspenseWrapper><SignUpPage /></SuspenseWrapper>} />
           <Route path="/signin" element={<Navigate to="/platformsignin" replace />} />
-          <Route path="/signup" element={<Navigate to="/platformsignup" replace />} />
+          <Route path="/signup" element={<Navigate to="/platformsignin" replace />} />
           <Route path="/forgot-password" element={<SuspenseWrapper><ForgotPasswordPage /></SuspenseWrapper>} />
           <Route path="/reset-password" element={<SuspenseWrapper><ResetPasswordPage /></SuspenseWrapper>} />
           <Route path="/verify-email" element={<SuspenseWrapper><EmailVerificationPage /></SuspenseWrapper>} />

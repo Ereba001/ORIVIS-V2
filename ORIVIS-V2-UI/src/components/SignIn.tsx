@@ -150,9 +150,9 @@ export default function SignIn({ onSuccess, variant, compact }: SignInProps) {
         </button>
         <p className="text-[11px] text-brand-text-muted">
           {variant === "platform" ? (
-            <>Don't have an account?{" "}
-              <button type="button" onClick={() => navigate("/platformsignup")} className="text-brand-gold hover:underline font-semibold cursor-pointer">
-                Sign Up
+            <>Need help?{" "}
+              <button type="button" onClick={() => navigate("/forgot-password")} className="text-brand-gold hover:underline font-semibold cursor-pointer">
+                Forgot Password
               </button>
             </>
           ) : (
