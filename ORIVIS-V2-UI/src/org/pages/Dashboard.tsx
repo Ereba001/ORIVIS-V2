@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'motion/react'
 import {
@@ -17,20 +17,29 @@ import WidgetPanel from '../components/WidgetPanel'
 import ProgressBar from '../components/ProgressBar'
 import EmptyState from '../components/EmptyState'
 import SkeletonLoader from '../components/SkeletonLoader'
-import {
-  DASHBOARD_STATS, EVENTS_SUMMARY, ORG_NOTIFICATIONS, ACTIVITY_FEED,
-  TEAM_MEMBERS, SUBSCRIPTION, WORKSPACE_STATUSES, EVENT_HEALTH,
-  STORAGE, PENDING_TASKS, QUICK_ACTIONS, WORKSPACE_HEALTH,
-  SUBSCRIPTION_ELIGIBILITY,
-} from '../mock/data'
+import { orgService } from '../../services/org-service'
+import { useApiResource } from '../../hooks/useApiResource'
 import SeoHead from "../../components/SeoHead"
 
 type DashboardState = 'loading' | 'loaded' | 'empty' | 'error'
 
+const EVENT_HEALTH = [
+  { label: 'System Uptime', value: 99.9, max: 100, color: '#3B82F6' },
+  { label: 'Audit Trail', value: 100, max: 100, color: '#22C55E' },
+  { label: 'Ballot Integrity', value: 100, max: 100, color: '#22C55E' },
+]
+
+const QUICK_ACTIONS = [
+  { id: 'qa-1', label: 'Create Event', description: 'Set up a new election, poll or survey', href: '/org/events/create' },
+  { id: 'qa-2', label: 'Invite Team Member', description: 'Add administrators or election officers', href: '/org/team' },
+  { id: 'qa-3', label: 'Complete Setup', description: 'Configure workspace branding and preferences', href: '/org/workspace' },
+  { id: 'qa-4', label: 'View Billing', description: 'Review subscription and payment history', href: '/org/billing' },
+]
+
 export default function OrgDashboard() {
   const navigate = useNavigate()
   const { branding, admin } = useOrgBranding()
-  const [state] = useState<DashboardState>('loaded')
+  const { data, loading, error, reload } = useApiResource(orgService.getDashboard)
 
   useEffect(() => {
     const setupComplete = localStorage.getItem('orivis_setup_complete')
@@ -38,6 +47,8 @@ export default function OrgDashboard() {
       navigate('/org/setup', { replace: true })
     }
   }, [navigate])
+
+  const state: DashboardState = loading ? 'loading' : error || !data ? 'error' : data.elections.length === 0 && data.team.length === 0 ? 'empty' : 'loaded'
 
   if (state === 'loading') {
     return (
@@ -74,49 +85,20 @@ export default function OrgDashboard() {
         <EmptyState
           icon={AlertTriangle}
           title="Failed to Load Dashboard"
-          description="There was an error loading your dashboard data. Please try again."
-          action={{ label: 'Retry', onClick: () => window.location.reload() }}
+          description={error ?? "There was an error loading your dashboard data. Please try again."}
+          action={{ label: 'Retry', onClick: reload }}
         />
       </div>
     )
   }
 
-  if (state === 'empty') {
-    return (
-      <div className="space-y-6">
-        <EmptyState
-          icon={Sparkles}
-          title={`Welcome to ${branding.shortName}`}
-          description="Your workspace is ready. Create your first election to get started."
-          action={{ label: 'Create Election', onClick: () => navigate('/org/events') }}
-        />
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <WidgetPanel title="Quick Actions" className="lg:col-span-2">
-            <EmptyState
-              icon={PlusCircle}
-              title="No Recent Activity"
-              description="Your activity feed will appear here once you start managing elections."
-            />
-          </WidgetPanel>
-          <WidgetPanel title="Notifications">
-            <EmptyState
-              icon={Clock}
-              title="All Clear"
-              description="No notifications at this time."
-            />
-          </WidgetPanel>
-        </div>
-      </div>
-    )
-  }
-
-  const activeElections = EVENTS_SUMMARY.filter((e) => e.status === 'live')
-  const upcomingElections = EVENTS_SUMMARY.filter((e) => e.status === 'published')
-  const activeMembers = TEAM_MEMBERS.filter((m) => m.status === 'active')
+  const activeElections = data!.elections.filter((e) => e.status === 'live')
+  const upcomingElections = data!.elections.filter((e) => e.status === 'published')
+  const activeMembers = data!.team.filter((m) => m.status === 'active')
   const getTimeBasedGreeting = () => { const h = new Date().getHours(); if (h < 12) return 'Good Morning'; if (h < 17) return 'Good Afternoon'; return 'Good Evening' }
   const greeting = getTimeBasedGreeting()
   const hasActiveEvents = activeElections.length > 0
-  const needsSetup = PENDING_TASKS.some((t) => t.priority === 'high')
+  const needsSetup = data!.pendingTasks.some((t) => t.priority === 'high')
 
   return (
     <>
@@ -157,7 +139,7 @@ export default function OrgDashboard() {
                   <Calendar size={10} />
                   <span>{branding.eventPackage}</span>
                 </div>
-                {SUBSCRIPTION.status === 'active' && (
+                {data!.subscription.status === 'active' && (
                   <div className="flex items-center gap-1.5 text-[10px] font-mono text-status-success">
                     <Shield size={10} />
                     <span>Workspace Active</span>
@@ -200,7 +182,7 @@ export default function OrgDashboard() {
 
       {/* ===== STATS ROW ===== */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {DASHBOARD_STATS.map((stat, i) => (
+        {data!.stats.map((stat, i) => (
           <StatCard key={stat.id} stat={stat} index={i} />
         ))}
       </div>
@@ -216,7 +198,7 @@ export default function OrgDashboard() {
             title="Elections"
             subtitle={
               hasActiveEvents
-                ? `${activeElections.length} active · ${upcomingElections.length} upcoming · ${EVENTS_SUMMARY.length} total`
+                ? `${activeElections.length} active · ${upcomingElections.length} upcoming · ${data!.elections.length} total`
                 : 'No active elections'
             }
             headerAction={
@@ -229,7 +211,7 @@ export default function OrgDashboard() {
               </button>
             }
           >
-            {EVENTS_SUMMARY.length === 0 ? (
+            {data!.elections.length === 0 ? (
               <EmptyState
                 icon={BarChart3}
                 title="No Elections Yet"
@@ -238,7 +220,7 @@ export default function OrgDashboard() {
               />
             ) : (
               <div className="space-y-2">
-                {EVENTS_SUMMARY.map((el) => (
+                {data!.elections.map((el) => (
                   <motion.button
                     key={el.id}
                     initial={{ opacity: 0, y: 6 }}
@@ -278,14 +260,14 @@ export default function OrgDashboard() {
             title="Activity Log"
             subtitle="Latest actions across workspace"
           >
-            {ACTIVITY_FEED.length === 0 ? (
+            {data!.activity.length === 0 ? (
               <EmptyState
                 icon={Activity}
                 title="No Recent Activity"
                 description="Your activity feed will populate as you manage your workspace."
               />
             ) : (
-              <ActivityTimeline events={ACTIVITY_FEED} />
+              <ActivityTimeline events={data!.activity} />
             )}
           </WidgetPanel>
 
@@ -320,7 +302,7 @@ export default function OrgDashboard() {
           {/* Team Summary */}
           <WidgetPanel
             title="Team"
-            subtitle={`${activeMembers.length} active · ${TEAM_MEMBERS.length} total members`}
+            subtitle={`${activeMembers.length} active · ${data!.team.length} total members`}
             headerAction={
               <button
                 onClick={() => navigate('/org/team')}
@@ -331,7 +313,7 @@ export default function OrgDashboard() {
               </button>
             }
           >
-            {TEAM_MEMBERS.length === 0 ? (
+            {data!.team.length === 0 ? (
               <EmptyState
                 icon={Users}
                 title="No Team Members"
@@ -340,7 +322,7 @@ export default function OrgDashboard() {
               />
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {TEAM_MEMBERS.slice(0, 4).map((member) => (
+                {data!.team.slice(0, 4).map((member) => (
                   <div key={member.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-brand-surface-elevated/20">
                     <div
                       className="w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-bold shrink-0"
@@ -368,9 +350,9 @@ export default function OrgDashboard() {
           {/* What needs attention (storytelling) */}
           <WidgetPanel
             title="Attention Required"
-            subtitle={PENDING_TASKS.length > 0 ? `${PENDING_TASKS.length} items need review` : 'All clear'}
+            subtitle={data!.pendingTasks.length > 0 ? `${data!.pendingTasks.length} items need review` : 'All clear'}
           >
-            {PENDING_TASKS.length === 0 ? (
+            {data!.pendingTasks.length === 0 ? (
               <EmptyState
                 icon={CheckCircle}
                 title="Everything Looks Good"
@@ -378,7 +360,7 @@ export default function OrgDashboard() {
               />
             ) : (
               <div className="space-y-2">
-                {PENDING_TASKS.map((task) => (
+                {data!.pendingTasks.map((task) => (
                   <button
                     key={task.id}
                     onClick={() => navigate(task.href)}
@@ -406,46 +388,46 @@ export default function OrgDashboard() {
           </WidgetPanel>
 
           {/* Workspace Health — enriched */}
-          <WidgetPanel title="Workspace Health" subtitle={`Score: ${WORKSPACE_HEALTH.workspaceScore}%`}>
+          <WidgetPanel title="Workspace Health" subtitle={`Score: ${data!.health.workspaceScore}%`}>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-mono text-brand-text-muted">Security Score</span>
-                <span className="text-[10px] font-mono font-semibold text-brand-text-primary">{WORKSPACE_HEALTH.securityScore}%</span>
+                <span className="text-[10px] font-mono font-semibold text-brand-text-primary">{data!.health.securityScore}%</span>
               </div>
-              <ProgressBar value={WORKSPACE_HEALTH.securityScore} max={100} color={WORKSPACE_HEALTH.securityScore > 80 ? '#22C55E' : WORKSPACE_HEALTH.securityScore > 60 ? '#F59E0B' : '#EF4444'} size="sm" showLabel={false} />
+              <ProgressBar value={data!.health.securityScore} max={100} color={data!.health.securityScore > 80 ? '#22C55E' : data!.health.securityScore > 60 ? '#F59E0B' : '#EF4444'} size="sm" showLabel={false} />
               <div className="grid grid-cols-2 gap-3 pt-1">
                 <div className="flex items-center gap-2">
                   <Database size={12} className="text-brand-text-muted" />
                   <div>
                     <p className="text-[9px] font-mono text-brand-text-muted">Storage</p>
-                    <p className="text-[10px] font-mono text-brand-text-primary">{WORKSPACE_HEALTH.storageUsed} / {WORKSPACE_HEALTH.storageTotal} GB</p>
+                    <p className="text-[10px] font-mono text-brand-text-primary">{data!.health.storageUsed} / {data!.health.storageTotal} GB</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Activity size={12} className="text-brand-text-muted" />
                   <div>
                     <p className="text-[9px] font-mono text-brand-text-muted">Events</p>
-                    <p className="text-[10px] font-mono text-brand-text-primary">{WORKSPACE_HEALTH.activeEvents} active / {WORKSPACE_HEALTH.completedEvents} completed</p>
+                    <p className="text-[10px] font-mono text-brand-text-primary">{data!.health.activeEvents} active / {data!.health.completedEvents} completed</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <HardDrive size={12} className="text-brand-text-muted" />
                   <div>
                     <p className="text-[9px] font-mono text-brand-text-muted">Pending Tasks</p>
-                    <p className="text-[10px] font-mono text-brand-text-primary">{WORKSPACE_HEALTH.pendingTasks}</p>
+                    <p className="text-[10px] font-mono text-brand-text-primary">{data!.health.pendingTasks}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Bell size={12} className="text-brand-text-muted" />
                   <div>
                     <p className="text-[9px] font-mono text-brand-text-muted">Notifications</p>
-                    <p className="text-[10px] font-mono text-brand-text-primary capitalize">{WORKSPACE_HEALTH.notificationStatus.replace(/_/g, ' ')}</p>
+                    <p className="text-[10px] font-mono text-brand-text-primary capitalize">{data!.health.notificationStatus.replace(/_/g, ' ')}</p>
                   </div>
                 </div>
               </div>
-              {WORKSPACE_HEALTH.systemMessages.length > 0 && (
+              {data!.health.systemMessages.length > 0 && (
                 <div className="space-y-1 pt-2 border-t border-brand-divider">
-                  {WORKSPACE_HEALTH.systemMessages.map((msg, i) => (
+                  {data!.health.systemMessages.map((msg, i) => (
                     <div key={i} className="flex items-center gap-1.5">
                       <span className="w-1 h-1 rounded-full bg-status-success shrink-0" />
                       <span className="text-[9px] font-mono text-brand-text-muted">{msg}</span>
@@ -462,11 +444,11 @@ export default function OrgDashboard() {
             subtitle="Recent updates"
             headerAction={
               <span className="text-[9px] font-mono" style={{ color: branding.primaryColor }}>
-                {ORG_NOTIFICATIONS.filter((n) => !n.read).length} new
+                {data!.notifications.filter((n) => !n.read).length} new
               </span>
             }
           >
-            {ORG_NOTIFICATIONS.length === 0 ? (
+            {data!.notifications.length === 0 ? (
               <EmptyState
                 icon={Clock}
                 title="No Notifications"
@@ -474,7 +456,7 @@ export default function OrgDashboard() {
               />
             ) : (
               <div className="space-y-0.5 max-h-72 overflow-y-auto org-scrollbar -mx-1">
-                {ORG_NOTIFICATIONS.slice(0, 5).map((n, i) => (
+                {data!.notifications.slice(0, 5).map((n, i) => (
                   <NotificationCard key={n.id} notification={n} index={i} />
                 ))}
               </div>
@@ -497,31 +479,31 @@ export default function OrgDashboard() {
           </WidgetPanel>
 
           {/* Subscription */}
-          <WidgetPanel title="Subscription" subtitle={SUBSCRIPTION.plan}>
+          <WidgetPanel title="Subscription" subtitle={data!.subscription.plan}>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-mono text-brand-text-muted">Status</span>
-                <StatusBadge status={SUBSCRIPTION.status} />
+                <StatusBadge status={data!.subscription.status} />
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-mono text-brand-text-muted">Team Seats</span>
-                <span className="text-[10px] font-mono text-brand-text-primary">{SUBSCRIPTION.seatsUsed} / {SUBSCRIPTION.seatsTotal}</span>
+                <span className="text-[10px] font-mono text-brand-text-primary">{data!.subscription.seatsUsed} / {data!.subscription.seatsTotal}</span>
               </div>
-              <ProgressBar value={SUBSCRIPTION.seatsUsed} max={SUBSCRIPTION.seatsTotal} size="sm" label="Seat usage" />
+              <ProgressBar value={data!.subscription.seatsUsed} max={Math.max(1, data!.subscription.seatsTotal)} size="sm" label="Seat usage" />
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-mono text-brand-text-muted">Next billing</span>
-                <span className="text-[10px] font-mono text-brand-text-primary">{SUBSCRIPTION.nextBilling}</span>
+                <span className="text-[10px] font-mono text-brand-text-primary">{data!.subscription.nextBilling}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-mono text-brand-text-muted">Amount</span>
                 <span className="text-[10px] font-mono font-bold text-brand-text-primary">
-                  ${(SUBSCRIPTION.amount / 100).toLocaleString()}/{SUBSCRIPTION.currency}
+                  ${(data!.subscription.amount / 100).toLocaleString()}/{data!.subscription.currency}
                 </span>
               </div>
               <div className="pt-3 border-t border-brand-divider">
                 <p className="text-[9px] font-mono font-bold text-brand-text-muted uppercase tracking-wider mb-2">Feature Eligibility</p>
                 <div className="space-y-1.5">
-                  {SUBSCRIPTION_ELIGIBILITY.slice(0, 5).map((check) => (
+                  {data!.eligibility.slice(0, 5).map((check) => (
                     <div key={check.feature} className="flex items-center justify-between">
                       <span className="text-[9px] font-mono text-brand-text-muted truncate mr-2">{check.feature}</span>
                       <span className={`text-[8px] font-mono px-1.5 py-0.5 rounded-full uppercase tracking-wider whitespace-nowrap ${
@@ -539,10 +521,10 @@ export default function OrgDashboard() {
           </WidgetPanel>
 
           {/* Storage */}
-          <WidgetPanel title="Storage" subtitle={`${STORAGE.used} ${STORAGE.unit} of ${STORAGE.total} ${STORAGE.unit}`}>
-            <ProgressBar value={STORAGE.used} max={STORAGE.total} color={STORAGE.used / STORAGE.total > 0.8 ? '#F59E0B' : branding.accentColor} size="sm" />
+          <WidgetPanel title="Storage" subtitle={`${data!.storage.used} ${data!.storage.unit} of ${data!.storage.total} ${data!.storage.unit}`}>
+            <ProgressBar value={data!.storage.used} max={Math.max(1, data!.storage.total)} color={data!.storage.total > 0 && data!.storage.used / data!.storage.total > 0.8 ? '#F59E0B' : branding.accentColor} size="sm" />
             <p className="text-[9px] font-mono text-brand-text-muted mt-2">
-              {STORAGE.used / STORAGE.total > 0.8 ? 'Storage is running low. Consider upgrading.' : 'Storage is healthy.'}
+              {data!.storage.total > 0 && data!.storage.used / data!.storage.total > 0.8 ? 'Storage is running low. Consider upgrading.' : 'Storage is healthy.'}
             </p>
           </WidgetPanel>
         </div>

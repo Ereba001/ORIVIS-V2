@@ -11,10 +11,8 @@ import DashboardCard from '../components/DashboardCard'
 import WidgetPanel from '../components/WidgetPanel'
 import EmptyState from '../components/EmptyState'
 import SkeletonLoader from '../components/SkeletonLoader'
-import {
-  TEAM_MEMBERS, INVITATIONS, SYSTEM_ROLES, CUSTOM_ROLES,
-  PERMISSION_GROUPS, SUBSCRIPTION,
-} from '../mock/data'
+import { orgService } from '../../services/org-service'
+import { useApiResource } from '../../hooks/useApiResource'
 import type { TeamMember, Invitation, Role, PermissionGroup } from '../types'
 import SeoHead from "../../components/SeoHead"
 
@@ -47,6 +45,51 @@ export default function OrgTeam() {
   const [showInviteModal, setShowInviteModal] = useState(false)
   const [showRoleModal, setShowRoleModal] = useState(false)
   const [editingRole, setEditingRole] = useState<Role | null>(null)
+
+  const { data, loading, error, reload } = useApiResource(async () => {
+    const [team, invitations, roles, permissions, subscription] = await Promise.all([
+      orgService.getTeam({ perPage: 100 }),
+      orgService.getInvitations(),
+      orgService.getRoles(),
+      orgService.getPermissions(),
+      orgService.getSubscriptionInfo(),
+    ])
+    return { team, invitations, roles, permissions, subscription }
+  })
+
+  if (loading) {
+    return (
+      <>
+        <SeoHead meta={{ title: "Team — Organization | ORIVIS", noindex: true }} />
+        <div className="space-y-6">
+          <div className="animate-pulse h-10 w-64 bg-brand-surface-elevated rounded-2xl" />
+          <div className="animate-pulse h-10 w-96 bg-brand-surface-elevated rounded-xl" />
+          <SkeletonLoader rows={5} variant="card" />
+        </div>
+      </>
+    )
+  }
+
+  if (error || !data) {
+    return (
+      <>
+        <SeoHead meta={{ title: "Team — Organization | ORIVIS", noindex: true }} />
+        <EmptyState
+          icon={Users}
+          title="Failed to load team"
+          description={error ?? 'Something went wrong loading your team.'}
+          action={{ label: 'Retry', onClick: reload }}
+        />
+      </>
+    )
+  }
+
+  const TEAM_MEMBERS = data.team.items
+  const INVITATIONS = data.invitations
+  const SYSTEM_ROLES = data.roles.filter((r) => r.type === 'system')
+  const CUSTOM_ROLES = data.roles.filter((r) => r.type === 'custom')
+  const PERMISSION_GROUPS = data.permissions
+  const SUBSCRIPTION = data.subscription
 
   const perPage = 8
   const filtered = TEAM_MEMBERS.filter((m) => {
