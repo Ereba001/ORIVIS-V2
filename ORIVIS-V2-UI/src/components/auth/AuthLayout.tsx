@@ -56,7 +56,7 @@ export default function AuthLayout({ children, title, subtitle, variant = "platf
         <div className="flex-1 flex items-center justify-center px-8 py-12">
           <div className="w-full max-w-2xl">
             <div className="mb-8">
-              <h1 className="font-display font-black text-2xl uppercase tracking-tight text-brand-text-primary">
+              <h1 className="font-display font-bold text-2xl uppercase tracking-tight text-brand-text-primary">
                 {title}
               </h1>
               <p className="text-sm text-brand-text-muted mt-1.5">

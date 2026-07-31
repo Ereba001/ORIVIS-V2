@@ -68,7 +68,7 @@ export default function UserDetail() {
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
-              <h1 className="text-2xl font-display font-black uppercase tracking-tight text-brand-text-primary">{user.name}</h1>
+              <h1 className="text-2xl font-display font-bold uppercase tracking-tight text-brand-text-primary">{user.name}</h1>
               <span className="text-[9px] font-mono uppercase px-2 py-0.5 rounded-full bg-status-success/10 text-status-success font-bold">{user.status}</span>
             </div>
             <p className="text-xs text-brand-text-muted">{user.email}</p>

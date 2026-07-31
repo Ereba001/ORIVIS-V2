@@ -8,8 +8,11 @@ import { useOrgBranding } from '../contexts/OrgBrandingContext'
 import DashboardCard from '../components/DashboardCard'
 import EmptyState from '../components/EmptyState'
 import ProgressBar from '../components/ProgressBar'
+import SkeletonLoader from '../components/SkeletonLoader'
 import SeoHead from "../../components/SeoHead"
 import type { ArchiveRecord } from '../types'
+import { orgService } from '../../services/org-service'
+import { useApiResource } from '../../hooks/useApiResource'
 
 type ReasonFilter = 'all' | 'completed' | 'cancelled' | 'expired'
 
@@ -20,75 +23,55 @@ interface ConfirmDialogState {
   onConfirm: () => void
 }
 
-const MOCK_ARCHIVE_RECORDS: ArchiveRecord[] = [
-  {
-    id: 'arc-1', eventId: 'evt-10', eventTitle: 'Alumni Mentorship Program Survey',
-    archivedAt: '2026-07-01T10:00:00Z',
-    reason: 'completed',
-    archiveHistory: [
-      { action: 'Archived', timestamp: '2026-07-01T10:00:00Z', user: 'System' },
-      { action: 'Export Created', timestamp: '2026-07-01T10:05:00Z', user: 'System' },
-    ],
-    canRestore: false, retentionPeriod: '1 year',
-  },
-  {
-    id: 'arc-2', eventId: 'evt-9', eventTitle: 'Campus Facilities Feedback Poll',
-    archivedAt: '2026-07-08T10:00:00Z',
-    reason: 'completed',
-    archiveHistory: [
-      { action: 'Archived', timestamp: '2026-07-08T10:00:00Z', user: 'System' },
-      { action: 'Data Exported', timestamp: '2026-07-08T10:10:00Z', user: 'System' },
-      { action: 'Results Published', timestamp: '2026-07-09T08:00:00Z', user: 'Chioma Okafor' },
-    ],
-    canRestore: false, retentionPeriod: '1 year',
-  },
-  {
-    id: 'arc-3', eventId: 'evt-6', eventTitle: 'Research Grant Allocation Committee Vote',
-    archivedAt: '2026-06-18T10:00:00Z',
-    reason: 'completed',
-    archiveHistory: [
-      { action: 'Archived', timestamp: '2026-06-18T10:00:00Z', user: 'System' },
-    ],
-    canRestore: true, retentionPeriod: '2 years',
-  },
-  {
-    id: 'arc-4', eventId: 'evt-7', eventTitle: 'Emergency Student Assembly Vote',
-    archivedAt: '2026-06-05T08:00:00Z',
-    reason: 'cancelled',
-    archiveHistory: [
-      { action: 'Archived', timestamp: '2026-06-05T08:00:00Z', user: 'System' },
-      { action: 'Cancelled Notification Sent', timestamp: '2026-06-05T08:30:00Z', user: 'Chioma Okafor' },
-    ],
-    canRestore: true, retentionPeriod: '1 year',
-  },
-  {
-    id: 'arc-5', eventId: 'evt-8', eventTitle: 'Faculty Hiring Committee Election',
-    archivedAt: '2026-05-20T14:00:00Z',
-    reason: 'expired',
-    archiveHistory: [
-      { action: 'Archived', timestamp: '2026-05-20T14:00:00Z', user: 'System' },
-      { action: 'Retention Review', timestamp: '2026-06-01T09:00:00Z', user: 'Tunde Bakare' },
-    ],
-    canRestore: false, retentionPeriod: '6 months',
-  },
-  {
-    id: 'arc-6', eventId: 'evt-5', eventTitle: 'Q2 Financial Audit Election',
-    archivedAt: '2026-05-15T11:00:00Z',
-    reason: 'completed',
-    archiveHistory: [
-      { action: 'Archived', timestamp: '2026-05-15T11:00:00Z', user: 'System' },
-      { action: 'Final Report Generated', timestamp: '2026-05-15T12:00:00Z', user: 'System' },
-      { action: 'Results Certified', timestamp: '2026-05-16T09:00:00Z', user: 'Adaobi Okafor' },
-    ],
-    canRestore: false, retentionPeriod: '3 years',
-  },
-]
-
 export default function OrgArchiveCentre() {
   const { branding } = useOrgBranding()
   const [search, setSearch] = useState('')
   const [reasonFilter, setReasonFilter] = useState<ReasonFilter>('all')
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState>({ open: false, title: '', description: '', onConfirm: () => {} })
+
+  const { data, loading, error, reload } = useApiResource(async () => {
+    const result = await orgService.getArchive({ perPage: 100 })
+    return result.items.map((e) => ({
+      id: e.uuid,
+      eventId: e.uuid,
+      eventTitle: e.title,
+      archivedAt: e.archived_at ?? e.updated_at ?? '',
+      reason: e.lifecycle_state === 'cancelled' ? 'cancelled' : e.lifecycle_state === 'completed' ? 'completed' : 'expired',
+      archiveHistory: [
+        { action: 'Archived', timestamp: e.archived_at ?? e.updated_at ?? '', user: 'System' },
+      ],
+      canRestore: true,
+      retentionPeriod: '1 year',
+    }))
+  })
+
+  const MOCK_ARCHIVE_RECORDS = data ?? []
+
+  if (loading) {
+    return (
+      <>
+        <SeoHead meta={{ title: 'Archive Centre — Organization | ORIVIS', noindex: true }} />
+        <div className="space-y-6">
+          <div className="animate-pulse h-10 w-64 bg-brand-surface-elevated rounded-2xl" />
+          <SkeletonLoader rows={4} variant="card" />
+        </div>
+      </>
+    )
+  }
+
+  if (error) {
+    return (
+      <>
+        <SeoHead meta={{ title: 'Archive Centre — Organization | ORIVIS', noindex: true }} />
+        <EmptyState
+          icon={Archive}
+          title="Failed to load archive"
+          description={error}
+          action={{ label: 'Retry', onClick: reload }}
+        />
+      </>
+    )
+  }
 
   const filtered = useMemo(() => {
     let result = [...MOCK_ARCHIVE_RECORDS]
@@ -98,21 +81,29 @@ export default function OrgArchiveCentre() {
       result = result.filter((r) => r.eventTitle.toLowerCase().includes(q) || r.reason.toLowerCase().includes(q))
     }
     return result
-  }, [reasonFilter, search])
+  }, [reasonFilter, search, MOCK_ARCHIVE_RECORDS])
 
   const reasonCounts = useMemo(() => ({
     all: MOCK_ARCHIVE_RECORDS.length,
     completed: MOCK_ARCHIVE_RECORDS.filter((r) => r.reason === 'completed').length,
     cancelled: MOCK_ARCHIVE_RECORDS.filter((r) => r.reason === 'cancelled').length,
     expired: MOCK_ARCHIVE_RECORDS.filter((r) => r.reason === 'expired').length,
-  }), [])
+  }), [MOCK_ARCHIVE_RECORDS])
 
   const handleRestore = (record: ArchiveRecord) => {
     setConfirmDialog({
       open: true,
       title: `Restore "${record.eventTitle}"?`,
       description: `This will restore the archived event and make it available again. This action can be undone.`,
-      onConfirm: () => setConfirmDialog((prev) => ({ ...prev, open: false })),
+      onConfirm: async () => {
+        setConfirmDialog((prev) => ({ ...prev, open: false }))
+        try {
+          await orgService.restoreArchived(record.eventId)
+          reload()
+        } catch {
+          setConfirmDialog({ open: true, title: 'Restore failed', description: 'Something went wrong while restoring this event.', onConfirm: () => setConfirmDialog((prev) => ({ ...prev, open: false })) })
+        }
+      },
     })
   }
 
@@ -121,7 +112,15 @@ export default function OrgArchiveCentre() {
       open: true,
       title: `Permanently delete "${record.eventTitle}"?`,
       description: 'This action cannot be undone. All archived data will be permanently removed.',
-      onConfirm: () => setConfirmDialog((prev) => ({ ...prev, open: false })),
+      onConfirm: async () => {
+        setConfirmDialog((prev) => ({ ...prev, open: false }))
+        try {
+          await orgService.permanentlyDeleteArchived(record.eventId)
+          reload()
+        } catch {
+          setConfirmDialog({ open: true, title: 'Delete failed', description: 'Something went wrong while deleting this event.', onConfirm: () => setConfirmDialog((prev) => ({ ...prev, open: false })) })
+        }
+      },
     })
   }
 
@@ -146,7 +145,7 @@ export default function OrgArchiveCentre() {
       <div className="space-y-6 max-w-5xl mx-auto pb-8">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-xl font-display font-black uppercase tracking-tight text-brand-text-primary">
+            <h1 className="text-xl font-display font-bold uppercase tracking-tight text-brand-text-primary">
               Archive Centre
             </h1>
             <p className="text-[10px] font-mono text-brand-text-muted mt-0.5">

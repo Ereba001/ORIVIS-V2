@@ -9,26 +9,82 @@ import DashboardCard from '../components/DashboardCard'
 import WidgetPanel from '../components/WidgetPanel'
 import ProgressBar from '../components/ProgressBar'
 import EmptyState from '../components/EmptyState'
-import { BILLING_PLANS, INVOICES, PAYMENT_METHODS, SUBSCRIPTION, STORAGE } from '../mock/data'
+import SkeletonLoader from '../components/SkeletonLoader'
+import { orgService } from '../../services/org-service'
+import { useApiResource } from '../../hooks/useApiResource'
+import type { PaymentMethod } from '../types'
 import SeoHead from "../../components/SeoHead"
+
+const PAYMENT_METHODS: PaymentMethod[] = [
+  { id: 'pm-1', type: 'card', last4: '4242', brand: 'Visa', expMonth: 12, expYear: 2028, isDefault: true },
+]
 
 export default function OrgBilling() {
   const { branding } = useOrgBranding()
   const [interval, setInterval] = useState<'month' | 'year'>('month')
   const pColor = branding.primaryColor
 
-  const currentPlan = BILLING_PLANS.find((p) => p.id === 'plan-enterprise')!
+  const { data, loading, error, reload } = useApiResource(async () => {
+    const [plans, subscription, invoices, billing] = await Promise.all([
+      orgService.getBillingPlans(),
+      orgService.getSubscriptionInfo(),
+      orgService.getInvoices(),
+      orgService.getBilling(),
+    ])
+    return { plans, subscription, invoices, billing }
+  })
+
+  if (loading) {
+    return (
+      <>
+        <SeoHead meta={{ title: "Billing — Organization | ORIVIS", noindex: true }} />
+        <div className="space-y-6">
+          <div className="animate-pulse h-10 w-64 bg-brand-surface-elevated rounded-2xl" />
+          <div className="animate-pulse h-32 bg-brand-surface-elevated rounded-2xl" />
+          <SkeletonLoader rows={4} variant="card" />
+        </div>
+      </>
+    )
+  }
+
+  if (error || !data) {
+    return (
+      <>
+        <SeoHead meta={{ title: "Billing — Organization | ORIVIS", noindex: true }} />
+        <EmptyState
+          icon={CreditCard}
+          title="Failed to load billing"
+          description={error ?? 'Something went wrong loading your billing information.'}
+          action={{ label: 'Retry', onClick: reload }}
+        />
+      </>
+    )
+  }
+
+  const BILLING_PLANS = data.plans
+  const INVOICES = data.invoices
+  const SUBSCRIPTION = data.subscription
+  const currentPlan = BILLING_PLANS.find((p) => p.id === data.billing.plan?.uuid) ?? BILLING_PLANS[0] ?? { id: 'plan-enterprise', name: SUBSCRIPTION.plan, description: '', price: SUBSCRIPTION.amount, currency: SUBSCRIPTION.currency, interval: 'month' as const, popular: false, features: [], participantCapacity: 0, teamCapacity: 0, customRoleCapacity: 0, storageLimit: 0 }
 
   const filteredPlans = BILLING_PLANS
 
   const recentInvoices = INVOICES.slice(0, 5)
+
+  const storageGb = data.billing.usage.storage_bytes > 0
+    ? Math.max(0.1, Math.round((data.billing.usage.storage_bytes / 1024 / 1024 / 1024) * 10) / 10)
+    : 0
+  const storageTotalGb = data.billing.plan?.limits && (data.billing.plan.limits as Record<string, number>).storage_bytes
+    ? Math.round(((data.billing.plan.limits as Record<string, number>).storage_bytes) / 1024 / 1024 / 1024)
+    : 0
+  const STORAGE = { used: storageGb, total: Math.max(storageGb, storageTotalGb), unit: 'GB' }
+  const participantsUsed = data.billing.usage.participants
 
   return (
     <>
     <SeoHead meta={{ title: "Billing — Organization | ORIVIS", noindex: true }} />
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-display font-black uppercase tracking-tight" style={{ color: 'var(--org-primary)' }}>Billing & Subscription</h1>
+        <h1 className="text-2xl font-display font-bold uppercase tracking-tight" style={{ color: 'var(--org-primary)' }}>Billing & Subscription</h1>
         <p className="text-sm text-brand-text-muted mt-1">Manage your subscription, view invoices, and compare packages.</p>
       </div>
 
@@ -65,7 +121,7 @@ export default function OrgBilling() {
           <div className="text-center">
             <div className="flex items-center justify-center gap-1 mb-1">
               <TrendingUp size={12} className="text-brand-text-muted" />
-              <span className="text-lg font-bold font-mono" style={{ color: pColor }}>12,450</span>
+              <span className="text-lg font-bold font-mono" style={{ color: pColor }}>{participantsUsed.toLocaleString()}</span>
               <span className="text-[10px] font-mono text-brand-text-muted">voters</span>
             </div>
             <p className="text-[9px] font-mono text-brand-text-muted uppercase tracking-wider">Participants Used</p>
@@ -119,7 +175,7 @@ export default function OrgBilling() {
                 {plan.popular ? <Zap size={16} style={{ color: pColor }} /> : <Building2 size={16} className="text-brand-text-muted" />}
                 <h3 className="text-sm font-bold text-brand-text-primary">{plan.name}</h3>
               </div>
-              <p className="text-3xl font-black font-display text-brand-text-primary mb-1">
+              <p className="text-3xl font-bold font-display text-brand-text-primary mb-1">
                 ${price === 0 ? '0' : (price / 100).toLocaleString()}
                 <span className="text-[10px] font-mono font-normal text-brand-text-muted">
                   {price === 0 ? '' : interval === 'month' ? '/mo' : '/yr'}

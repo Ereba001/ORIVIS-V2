@@ -62,7 +62,7 @@ export default function PlatformDashboard() {
     >
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-display font-black uppercase tracking-tight text-brand-text-primary">
+          <h1 className="text-2xl font-display font-bold uppercase tracking-tight text-brand-text-primary">
             Platform Dashboard
           </h1>
           <p className="text-sm text-brand-text-muted mt-1">{today}</p>

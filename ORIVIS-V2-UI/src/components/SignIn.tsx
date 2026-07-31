@@ -66,7 +66,7 @@ export default function SignIn({ onSuccess, variant, compact }: SignInProps) {
           <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
           {getStatusText()}
         </div>
-        <h1 className="font-display font-black text-xl uppercase tracking-tight text-brand-text-primary mt-3">
+        <h1 className="font-display font-bold text-xl uppercase tracking-tight text-brand-text-primary mt-3">
           {variant === "platform" ? "Platform Sign In" : "Organization Sign In"}
         </h1>
         <p className="text-xs text-brand-text-muted mt-1">
@@ -127,15 +127,17 @@ export default function SignIn({ onSuccess, variant, compact }: SignInProps) {
           </div>
         </div>
 
-        <motion.button
-          type="submit"
-          disabled={isSubmitting}
-          whileHover={isSubmitting ? {} : { scale: 1.01 }}
-          whileTap={isSubmitting ? {} : { scale: 0.99 }}
-          className="w-full bg-brand-gold hover:bg-brand-gold-hover text-brand-bg-secondary rounded-xl py-2 text-xs font-bold uppercase tracking-widest shadow-md transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 mt-1 disabled:opacity-50"
-        >
-          {isSubmitting ? <span>Authenticating...</span> : <span>Sign In</span>}
-        </motion.button>
+        <div className="flex justify-center pt-1">
+          <motion.button
+            type="submit"
+            disabled={isSubmitting}
+            whileHover={isSubmitting ? {} : { scale: 1.03 }}
+            whileTap={isSubmitting ? {} : { scale: 0.97 }}
+            className="w-full max-w-[240px] bg-brand-gold hover:bg-brand-gold-hover text-brand-bg-secondary rounded-full py-2.5 px-8 text-xs font-bold uppercase tracking-widest shadow-brand-gold transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+          >
+            {isSubmitting ? <span>Authenticating...</span> : <span>Sign In</span>}
+          </motion.button>
+        </div>
       </form>
 
       <div className="mt-3 flex flex-col items-center gap-1.5">

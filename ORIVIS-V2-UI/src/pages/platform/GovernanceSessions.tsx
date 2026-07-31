@@ -96,7 +96,7 @@ export default function GovernanceSessions() {
         <Breadcrumbs items={[{ label: "Governance Sessions" }]} />
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-display font-black uppercase tracking-tight text-brand-text-primary">Governance Sessions</h1>
+            <h1 className="text-2xl font-display font-bold uppercase tracking-tight text-brand-text-primary">Governance Sessions</h1>
             <p className="text-sm text-brand-text-muted mt-1">Master governance history — every workspace visit, inspection, and intervention.</p>
           </div>
           <div className="flex items-center gap-2">

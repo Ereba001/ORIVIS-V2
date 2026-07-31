@@ -72,7 +72,7 @@ export default function PlatformSecurity() {
       <Breadcrumbs items={[{ label: "Security" }]} />
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-display font-black uppercase tracking-tight text-brand-text-primary">Security & Audit</h1>
+          <h1 className="text-2xl font-display font-bold uppercase tracking-tight text-brand-text-primary">Security & Audit</h1>
           <p className="text-sm text-brand-text-muted mt-1">Monitor security events, permission changes, and sensitive actions.</p>
         </div>
         <div className="flex items-center gap-2 bg-brand-surface-elevated rounded-xl px-4 py-2 border border-brand-border">

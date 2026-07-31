@@ -31,7 +31,7 @@ export default function PlatformElections() {
     <div className="space-y-6">
       <Breadcrumbs items={[{ label: "Elections" }]} />
       <div>
-        <h1 className="text-2xl font-display font-black uppercase tracking-tight text-brand-text-primary">Elections</h1>
+        <h1 className="text-2xl font-display font-bold uppercase tracking-tight text-brand-text-primary">Elections</h1>
         <p className="text-sm text-brand-text-muted mt-1">Oversee elections across all organizations. Oversee and monitor election activity.</p>
       </div>
 

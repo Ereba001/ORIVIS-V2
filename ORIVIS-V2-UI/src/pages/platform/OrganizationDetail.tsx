@@ -691,7 +691,7 @@ export default function OrganizationDetail() {
               </div>
               <div>
                 <div className="flex flex-wrap items-center gap-2 mb-1">
-                  <h1 className="text-2xl font-display font-black uppercase tracking-tight text-brand-text-primary">
+                  <h1 className="text-2xl font-display font-bold uppercase tracking-tight text-brand-text-primary">
                     {org.organizationName}
                   </h1>
                   <StatusPill status={org.status} variant={STATUS_MAP[org.status] || "neutral"} />

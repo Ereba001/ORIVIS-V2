@@ -33,7 +33,7 @@ export default function UnauthorizedPage() {
             403 Forbidden
           </div>
 
-          <h1 className="font-display font-black text-xl uppercase tracking-tight text-brand-text-primary mb-2">
+          <h1 className="font-display font-bold text-xl uppercase tracking-tight text-brand-text-primary mb-2">
             Access Denied
           </h1>
           <p className="text-xs text-brand-text-muted leading-relaxed mb-8 max-w-sm mx-auto">

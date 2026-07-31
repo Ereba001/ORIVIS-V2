@@ -123,7 +123,7 @@ export default function OrgDashboard() {
             </div>
             <div>
               <p className="text-sm font-semibold text-brand-text-secondary">{greeting},</p>
-              <h1 className="text-xl font-display font-black uppercase tracking-tight text-brand-text-primary mt-0.5">
+              <h1 className="text-xl font-display font-bold uppercase tracking-tight text-brand-text-primary mt-0.5">
                 {branding.organizationName}
               </h1>
               <div className="flex flex-wrap items-center gap-3 mt-2">

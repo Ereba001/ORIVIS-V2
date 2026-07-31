@@ -100,7 +100,7 @@ export default function SetupWizard() {
                   >
                     <Sparkles size={36} />
                   </motion.div>
-                  <h2 className="text-xl font-display font-black uppercase tracking-tight text-brand-text-primary">
+                  <h2 className="text-xl font-display font-bold uppercase tracking-tight text-brand-text-primary">
                     Welcome, {branding.organizationName}
                   </h2>
                   <p className="text-xs text-brand-text-muted mt-3 max-w-md leading-relaxed">
@@ -299,7 +299,7 @@ export default function SetupWizard() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
-                    className="text-lg font-display font-black uppercase tracking-tight text-brand-text-primary"
+                    className="text-lg font-display font-bold uppercase tracking-tight text-brand-text-primary"
                   >
                     Setup Complete
                   </motion.h2>

@@ -66,7 +66,7 @@ export default function PlatformAudit() {
       <Breadcrumbs items={[{ label: "Audit Log" }]} />
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-display font-black uppercase tracking-tight text-brand-text-primary">Audit Log</h1>
+          <h1 className="text-2xl font-display font-bold uppercase tracking-tight text-brand-text-primary">Audit Log</h1>
           <p className="text-sm text-brand-text-muted mt-1">Platform-wide audit trail including governance events.</p>
         </div>
         <button className="flex items-center gap-2 bg-brand-surface border border-brand-border hover:border-brand-gold/30 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer">

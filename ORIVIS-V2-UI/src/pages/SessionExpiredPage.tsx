@@ -28,7 +28,7 @@ export default function SessionExpiredPage() {
             <Timer size={28} className="text-status-warning" />
           </div>
 
-          <h1 className="font-display font-black text-xl uppercase tracking-tight text-brand-text-primary mb-2">
+          <h1 className="font-display font-bold text-xl uppercase tracking-tight text-brand-text-primary mb-2">
             Session Expired
           </h1>
           <p className="text-xs text-brand-text-muted leading-relaxed mb-8 max-w-sm mx-auto">

@@ -103,7 +103,7 @@ export default function OrgWorkspaceSettings() {
         ) : (<>
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-display font-black uppercase tracking-tight" style={{ color: 'var(--org-primary)' }}>Workspace Settings</h1>
+            <h1 className="text-2xl font-display font-bold uppercase tracking-tight" style={{ color: 'var(--org-primary)' }}>Workspace Settings</h1>
             <p className="text-sm text-brand-text-muted mt-1">Configure your organization profile, branding, and workspace preferences.</p>
           </div>
           <button onClick={handleSave} disabled={saving}

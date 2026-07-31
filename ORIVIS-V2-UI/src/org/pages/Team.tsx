@@ -141,7 +141,7 @@ export default function OrgTeam() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-display font-black uppercase tracking-tight" style={{ color: 'var(--org-primary)' }}>Team Management</h1>
+          <h1 className="text-2xl font-display font-bold uppercase tracking-tight" style={{ color: 'var(--org-primary)' }}>Team Management</h1>
           <p className="text-sm text-brand-text-muted mt-1">Manage team members, roles, permissions, and invitations.</p>
         </div>
         {tab === 'members' && (

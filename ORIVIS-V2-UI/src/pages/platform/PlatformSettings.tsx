@@ -21,7 +21,7 @@ export default function PlatformSettings() {
     <div className="max-w-2xl space-y-6">
       <Breadcrumbs items={[{ label: "Settings" }]} />
       <div>
-        <h1 className="text-2xl font-display font-black uppercase tracking-tight text-brand-text-primary">Platform Settings</h1>
+        <h1 className="text-2xl font-display font-bold uppercase tracking-tight text-brand-text-primary">Platform Settings</h1>
         <p className="text-sm text-brand-text-muted mt-1">Configure global platform settings.</p>
       </div>
 

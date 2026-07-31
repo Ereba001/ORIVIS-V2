@@ -7,38 +7,14 @@ import {
 import { useOrgBranding } from '../contexts/OrgBrandingContext'
 import DashboardCard from '../components/DashboardCard'
 import EmptyState from '../components/EmptyState'
+import SkeletonLoader from '../components/SkeletonLoader'
 import SeoHead from "../../components/SeoHead"
 import type { EventTemplate } from '../types'
 import type { EventType } from '../types'
+import { orgService } from '../../services/org-service'
+import { useApiResource } from '../../hooks/useApiResource'
 
 type CategoryFilter = 'all' | 'default' | 'organization' | 'recent'
-
-const MOCK_TEMPLATES: EventTemplate[] = [
-  {
-    id: 'tpl-1', name: 'Standard Governance Election', description: 'Template for running a standard governance election with positions and candidates.', type: 'governance_election', category: 'default', configuration: { title: '', description: '', timezone: 'Africa/Lagos', visibility: 'public', branding: { primaryColor: '#1a56db', accentColor: '#FCA311', theme: 'dark' }, settings: { participationModel: 'closed_list', allowAnonymousVoting: false, requireEmailVerification: true, requireIdVerification: true, maxVotesPerParticipant: 1, resultPublication: 'immediate', resultPublishedAt: null, notifyOnRegistration: true, notifyOnVote: true, allowMultipleVotes: false, requireTwoFactor: false } },
-    createdAt: '2026-01-01T00:00:00Z', usedCount: 5,
-  },
-  {
-    id: 'tpl-2', name: 'Annual General Meeting', description: 'Template for managing AGM proceedings including resolutions and member voting.', type: 'agm', category: 'default', configuration: { title: '', description: '', timezone: 'Africa/Lagos', visibility: 'public', branding: { primaryColor: '#1a56db', accentColor: '#FCA311', theme: 'dark' }, settings: { participationModel: 'closed_list', allowAnonymousVoting: false, requireEmailVerification: true, requireIdVerification: true, maxVotesPerParticipant: 1, resultPublication: 'immediate', resultPublishedAt: null, notifyOnRegistration: true, notifyOnVote: true, allowMultipleVotes: false, requireTwoFactor: false } },
-    createdAt: '2026-01-01T00:00:00Z', usedCount: 2,
-  },
-  {
-    id: 'tpl-3', name: 'Student Satisfaction Survey', description: 'Template for annual student satisfaction surveys with anonymous responses.', type: 'survey', category: 'default', configuration: { title: '', description: '', timezone: 'Africa/Lagos', visibility: 'public', branding: { primaryColor: '#0ea5e9', accentColor: '#FCA311', theme: 'dark' }, settings: { participationModel: 'open_public', allowAnonymousVoting: true, requireEmailVerification: false, requireIdVerification: false, maxVotesPerParticipant: 1, resultPublication: 'manual', resultPublishedAt: null, notifyOnRegistration: false, notifyOnVote: false, allowMultipleVotes: false, requireTwoFactor: false } },
-    createdAt: '2026-01-01T00:00:00Z', usedCount: 3,
-  },
-  {
-    id: 'tpl-4', name: 'Candidate Selection Poll', description: 'Template for internal party or committee candidate selection elections.', type: 'governance_election', category: 'organization', configuration: { title: '', description: '', timezone: 'Africa/Lagos', visibility: 'private', branding: { primaryColor: '#1a56db', accentColor: '#FCA311', theme: 'dark' }, settings: { participationModel: 'closed_list', allowAnonymousVoting: false, requireEmailVerification: true, requireIdVerification: true, maxVotesPerParticipant: 1, resultPublication: 'immediate', resultPublishedAt: null, notifyOnRegistration: true, notifyOnVote: true, allowMultipleVotes: false, requireTwoFactor: false } },
-    createdAt: '2026-03-15T00:00:00Z', usedCount: 7,
-  },
-  {
-    id: 'tpl-5', name: 'Budget Approval Referendum', description: 'Template for organizational budget approval referendums with multiple line items.', type: 'referendum', category: 'organization', configuration: { title: '', description: '', timezone: 'Africa/Lagos', visibility: 'public', branding: { primaryColor: '#0ea5e9', accentColor: '#FCA311', theme: 'dark' }, settings: { participationModel: 'open_public', allowAnonymousVoting: false, requireEmailVerification: true, requireIdVerification: true, maxVotesPerParticipant: 1, resultPublication: 'scheduled', resultPublishedAt: null, notifyOnRegistration: true, notifyOnVote: true, allowMultipleVotes: false, requireTwoFactor: false } },
-    createdAt: '2026-04-01T00:00:00Z', usedCount: 4,
-  },
-  {
-    id: 'tpl-6', name: 'Quick Feedback Poll', description: 'Lightweight template for quick opinion polls and feedback gathering.', type: 'poll', category: 'recent', configuration: { title: '', description: '', timezone: 'Africa/Lagos', visibility: 'public', branding: { primaryColor: '#1a56db', accentColor: '#FCA311', theme: 'dark' }, settings: { participationModel: 'open_public', allowAnonymousVoting: true, requireEmailVerification: false, requireIdVerification: false, maxVotesPerParticipant: 1, resultPublication: 'immediate', resultPublishedAt: null, notifyOnRegistration: false, notifyOnVote: false, allowMultipleVotes: true, requireTwoFactor: false } },
-    createdAt: '2026-07-20T00:00:00Z', usedCount: 1,
-  },
-]
 
 const TYPE_LABELS: Record<EventType, string> = {
   governance_election: 'Governance Election', award_competition: 'Award Competition', poll: 'Poll',
@@ -51,6 +27,39 @@ export default function OrgTemplates() {
   const [search, setSearch] = useState('')
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all')
 
+  const { data, loading, error, reload } = useApiResource(async () => {
+    const result = await orgService.getTemplates({ perPage: 100 })
+    return result.items
+  })
+
+  const MOCK_TEMPLATES = data ?? []
+
+  if (loading) {
+    return (
+      <>
+        <SeoHead meta={{ title: 'Templates — Organization | ORIVIS', noindex: true }} />
+        <div className="space-y-6">
+          <div className="animate-pulse h-10 w-64 bg-brand-surface-elevated rounded-2xl" />
+          <SkeletonLoader rows={4} variant="card" />
+        </div>
+      </>
+    )
+  }
+
+  if (error) {
+    return (
+      <>
+        <SeoHead meta={{ title: 'Templates — Organization | ORIVIS', noindex: true }} />
+        <EmptyState
+          icon={LayoutTemplate}
+          title="Failed to load templates"
+          description={error}
+          action={{ label: 'Retry', onClick: reload }}
+        />
+      </>
+    )
+  }
+
   const filtered = useMemo(() => {
     let result = [...MOCK_TEMPLATES]
     if (categoryFilter !== 'all') result = result.filter((t) => t.category === categoryFilter)
@@ -59,14 +68,14 @@ export default function OrgTemplates() {
       result = result.filter((t) => t.name.toLowerCase().includes(q) || t.description.toLowerCase().includes(q))
     }
     return result
-  }, [categoryFilter, search])
+  }, [categoryFilter, search, MOCK_TEMPLATES])
 
   const recentTemplates = useMemo(() =>
-    MOCK_TEMPLATES.filter((t) => t.category === 'recent').sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()), [])
+    MOCK_TEMPLATES.filter((t) => t.category === 'recent').sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()), [MOCK_TEMPLATES])
   const defaultTemplates = useMemo(() =>
-    MOCK_TEMPLATES.filter((t) => t.category === 'default').sort((a, b) => b.usedCount - a.usedCount), [])
+    MOCK_TEMPLATES.filter((t) => t.category === 'default').sort((a, b) => b.usedCount - a.usedCount), [MOCK_TEMPLATES])
   const orgTemplates = useMemo(() =>
-    MOCK_TEMPLATES.filter((t) => t.category === 'organization').sort((a, b) => b.usedCount - a.usedCount), [])
+    MOCK_TEMPLATES.filter((t) => t.category === 'organization').sort((a, b) => b.usedCount - a.usedCount), [MOCK_TEMPLATES])
 
   const [previewing, setPreviewing] = useState<string | null>(null)
 
@@ -84,7 +93,7 @@ export default function OrgTemplates() {
       <div className="space-y-6 max-w-[1440px] mx-auto pb-8">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-xl font-display font-black uppercase tracking-tight text-brand-text-primary">
+            <h1 className="text-xl font-display font-bold uppercase tracking-tight text-brand-text-primary">
               Event Templates
             </h1>
             <p className="text-[10px] font-mono text-brand-text-muted mt-0.5">

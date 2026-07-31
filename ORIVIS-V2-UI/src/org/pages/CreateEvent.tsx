@@ -188,7 +188,7 @@ export default function CreateEvent() {
       {/* ===== HEADER ===== */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-display font-black uppercase tracking-tight text-brand-text-primary">
+          <h1 className="text-xl font-display font-bold uppercase tracking-tight text-brand-text-primary">
             Create Event
           </h1>
           <p className="text-xs text-brand-text-muted mt-0.5">

@@ -313,7 +313,7 @@ export default function EventDetail() {
               <span>/</span>
               <span className="truncate text-brand-text-primary">{event.title}</span>
             </div>
-            <h1 className="text-xl font-display font-black uppercase tracking-tight text-brand-text-primary truncate">
+            <h1 className="text-xl font-display font-bold uppercase tracking-tight text-brand-text-primary truncate">
               {event.title}
             </h1>
           </div>
@@ -449,7 +449,7 @@ function OverviewTab({ event, activities, analytics }: { event: OrivisEvent; act
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center mx-auto mb-2 bg-brand-surface-elevated" style={{ color: pColor }}>
                   <StatIcon size={16} />
                 </div>
-                <p className="text-lg font-display font-black text-brand-text-primary">{typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value}</p>
+                <p className="text-lg font-display font-bold text-brand-text-primary">{typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value}</p>
                 <p className="text-[9px] font-mono text-brand-text-muted uppercase tracking-wider">{stat.label}</p>
               </div>
             )
@@ -1520,11 +1520,11 @@ function AnalyticsTab({ event, analytics }: { event: OrivisEvent; analytics?: Ev
           <div className="space-y-4">
             <div className="p-4 rounded-xl bg-brand-surface-elevated/20 text-center">
               <p className="text-[10px] font-mono text-brand-text-muted mb-1">Current Turnout</p>
-              <p className="text-2xl font-display font-black" style={{ color: pColor }}>{analytics.turnoutProjection.current}%</p>
+              <p className="text-2xl font-display font-bold" style={{ color: pColor }}>{analytics.turnoutProjection.current}%</p>
             </div>
             <div className="p-4 rounded-xl bg-brand-surface-elevated/20 text-center">
               <p className="text-[10px] font-mono text-brand-text-muted mb-1">Projected Turnout</p>
-              <p className="text-2xl font-display font-black text-brand-text-primary">{analytics.turnoutProjection.projected}%</p>
+              <p className="text-2xl font-display font-bold text-brand-text-primary">{analytics.turnoutProjection.projected}%</p>
             </div>
             <ProgressBar value={analytics.turnoutProjection.percentage} max={100} color={pColor} label="Progress toward projected" />
           </div>
@@ -1684,7 +1684,7 @@ function ResultsTab({ event, positions }: { event: OrivisEvent; positions: Event
               <div className="w-9 h-9 rounded-xl flex items-center justify-center mx-auto mb-2 bg-brand-surface-elevated" style={{ color: pColor }}>
                 <StatIcon size={16} />
               </div>
-              <p className="text-lg font-display font-black text-brand-text-primary">{typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value}</p>
+              <p className="text-lg font-display font-bold text-brand-text-primary">{typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value}</p>
               <p className="text-[9px] font-mono text-brand-text-muted uppercase tracking-wider">{stat.label}</p>
             </div>
           )
@@ -1911,7 +1911,7 @@ function PublishingTab({ event }: { event: OrivisEvent }) {
             <p className="text-[11px] text-brand-text-muted mt-0.5">Complete all checks before publishing this event to participants.</p>
           </div>
           <div className="text-right">
-            <p className="text-2xl font-display font-black" style={{ color: allComplete ? '#22C55E' : pColor }}>{percentage}%</p>
+            <p className="text-2xl font-display font-bold" style={{ color: allComplete ? '#22C55E' : pColor }}>{percentage}%</p>
             <p className="text-[9px] font-mono text-brand-text-muted uppercase tracking-wider">{completedCount} of {totalCount} checks passed</p>
           </div>
         </div>

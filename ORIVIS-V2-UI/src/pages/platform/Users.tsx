@@ -80,7 +80,7 @@ export default function PlatformUsers() {
     <div className="space-y-6">
       <Breadcrumbs items={[{ label: "Users" }]} />
       <div>
-        <h1 className="text-2xl font-display font-black uppercase tracking-tight text-brand-text-primary">Users</h1>
+        <h1 className="text-2xl font-display font-bold uppercase tracking-tight text-brand-text-primary">Users</h1>
         <p className="text-sm text-brand-text-muted mt-1">Manage all platform users.</p>
       </div>
 

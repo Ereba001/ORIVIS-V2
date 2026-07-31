@@ -9,8 +9,11 @@ import { useOrgBranding } from '../contexts/OrgBrandingContext'
 import DashboardCard from '../components/DashboardCard'
 import WidgetPanel from '../components/WidgetPanel'
 import EmptyState from '../components/EmptyState'
+import SkeletonLoader from '../components/SkeletonLoader'
 import SeoHead from "../../components/SeoHead"
 import type { ReportType } from '../types'
+import { orgService } from '../../services/org-service'
+import { useApiResource } from '../../hooks/useApiResource'
 
 type ReportStatus = 'generated' | 'processing' | 'queued' | 'failed'
 type ExportFormat = 'csv' | 'pdf' | 'json'
@@ -63,16 +66,12 @@ const STATUS_LABELS: Record<ReportStatus, string> = {
   failed: 'Failed',
 }
 
-const MOCK_REPORTS: Report[] = [
-  { id: 'rpt-1', title: 'Executive Summary — Q3 2026', reportType: 'executive_summary', status: 'generated', generatedAt: '2026-07-28T14:30:00Z', size: '2.4 MB', format: 'pdf', downloads: 12 },
-  { id: 'rpt-2', title: 'Participation Report — Students Union Election', reportType: 'participation', status: 'generated', generatedAt: '2026-07-27T09:15:00Z', size: '1.1 MB', format: 'csv', downloads: 8 },
-  { id: 'rpt-3', title: 'Turnout Analysis — Faculty Senate Vote', reportType: 'turnout', status: 'processing', generatedAt: '2026-07-28T16:00:00Z', size: '—', format: 'pdf', downloads: 0 },
-  { id: 'rpt-4', title: 'Candidate Performance — AGM 2026', reportType: 'candidate_performance', status: 'generated', generatedAt: '2026-07-26T11:45:00Z', size: '3.7 MB', format: 'json', downloads: 5 },
-  { id: 'rpt-5', title: 'Results Summary — Budget Approval Poll', reportType: 'results_summary', status: 'generated', generatedAt: '2026-07-25T13:20:00Z', size: '890 KB', format: 'csv', downloads: 15 },
-  { id: 'rpt-6', title: 'Audit Report — Q2 2026 Elections', reportType: 'audit', status: 'generated', generatedAt: '2026-07-24T10:00:00Z', size: '5.2 MB', format: 'pdf', downloads: 3 },
-  { id: 'rpt-7', title: 'Timeline Report — Presidential Election', reportType: 'timeline', status: 'queued', generatedAt: '2026-07-28T17:00:00Z', size: '—', format: 'json', downloads: 0 },
-  { id: 'rpt-8', title: 'Event Summary — Mentorship Survey', reportType: 'event_summary', status: 'failed', generatedAt: '2026-07-23T08:30:00Z', size: '—', format: 'csv', downloads: 0 },
-]
+const REPORT_KEY_TO_TYPE: Record<string, ReportType> = {
+  elections: 'executive_summary',
+  voters: 'participation',
+  candidates: 'candidate_performance',
+  audit: 'audit',
+}
 
 export default function OrgReports() {
   const { branding } = useOrgBranding()
@@ -80,6 +79,45 @@ export default function OrgReports() {
   const [typeFilter, setTypeFilter] = useState<ReportType | 'all'>('all')
   const [statusFilter, setStatusFilter] = useState<ReportStatus | 'all'>('all')
   const [generating, setGenerating] = useState(false)
+
+  const { data, loading, error, reload } = useApiResource(orgService.getReports)
+
+  if (loading) {
+    return (
+      <>
+        <SeoHead meta={{ title: 'Reports — Organization | ORIVIS', noindex: true }} />
+        <div className="space-y-6">
+          <div className="animate-pulse h-10 w-64 bg-brand-surface-elevated rounded-2xl" />
+          <SkeletonLoader rows={4} variant="card" />
+        </div>
+      </>
+    )
+  }
+
+  if (error || !data) {
+    return (
+      <>
+        <SeoHead meta={{ title: 'Reports — Organization | ORIVIS', noindex: true }} />
+        <EmptyState
+          icon={BarChart3}
+          title="Failed to load reports"
+          description={error ?? 'Something went wrong loading reports.'}
+          action={{ label: 'Retry', onClick: reload }}
+        />
+      </>
+    )
+  }
+
+  const MOCK_REPORTS: Report[] = data.reports.map((r) => ({
+    id: r.key,
+    title: r.label,
+    reportType: REPORT_KEY_TO_TYPE[r.key] ?? 'event_summary',
+    status: 'generated',
+    generatedAt: new Date().toISOString(),
+    size: '—',
+    format: 'pdf',
+    downloads: 0,
+  }))
 
   const filtered = useMemo(() => {
     let result = [...MOCK_REPORTS]
@@ -90,14 +128,14 @@ export default function OrgReports() {
       result = result.filter((r) => r.title.toLowerCase().includes(q))
     }
     return result
-  }, [typeFilter, statusFilter, search])
+  }, [typeFilter, statusFilter, search, MOCK_REPORTS])
 
   const stats = useMemo(() => ({
     total: MOCK_REPORTS.length,
     generated: MOCK_REPORTS.filter((r) => r.status === 'generated').length,
     processing: MOCK_REPORTS.filter((r) => r.status === 'processing').length,
     failed: MOCK_REPORTS.filter((r) => r.status === 'failed').length,
-  }), [])
+  }), [MOCK_REPORTS])
 
   const handleExport = (format: ExportFormat) => {
     setGenerating(true)
@@ -110,7 +148,7 @@ export default function OrgReports() {
       <div className="space-y-6 max-w-[1440px] mx-auto pb-8">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-xl font-display font-black uppercase tracking-tight text-brand-text-primary">
+            <h1 className="text-xl font-display font-bold uppercase tracking-tight text-brand-text-primary">
               Reports Center
             </h1>
             <p className="text-[10px] font-mono text-brand-text-muted mt-0.5">

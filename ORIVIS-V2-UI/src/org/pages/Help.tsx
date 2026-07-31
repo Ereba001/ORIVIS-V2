@@ -10,13 +10,41 @@ import { useOrgBranding } from '../contexts/OrgBrandingContext'
 import DashboardCard from '../components/DashboardCard'
 import WidgetPanel from '../components/WidgetPanel'
 import EmptyState from '../components/EmptyState'
-import {
-  HELP_ARTICLES, FAQS, RELEASE_NOTES, WORKSPACE_STATUSES,
-} from '../mock/data'
-import type { HelpArticle, FAQItem, ReleaseNote } from '../types'
+import SkeletonLoader from '../components/SkeletonLoader'
+import { orgService } from '../../services/org-service'
+import { useApiResource } from '../../hooks/useApiResource'
+import type { HelpArticle, FAQItem, ReleaseNote, WorkspaceStatus } from '../types'
 import SeoHead from "../../components/SeoHead"
 
 type HelpTab = 'knowledge-base' | 'faq' | 'release-notes' | 'contact'
+
+const WORKSPACE_STATUSES: WorkspaceStatus[] = [
+  { label: 'Platform Status', value: 'All Systems Operational', variant: 'success' },
+  { label: 'Event Integrity', value: 'Verified — Zero-Knowledge Proofs Active', variant: 'success' },
+  { label: 'Data Encryption', value: 'End-to-End Encrypted', variant: 'success' },
+  { label: 'Last Backup', value: '3 hours ago', variant: 'info' },
+]
+
+const FAQS: FAQItem[] = [
+  { id: 'faq-1', question: 'How do I create my first event?', answer: 'Navigate to Events in the sidebar and click "Create Event". Fill in the details, add positions and candidates, then publish when ready.', category: 'Events' },
+  { id: 'faq-2', question: 'Can I import voters from a spreadsheet?', answer: 'Yes. Go to Voters and click "Import". We support CSV and Excel files. Map the columns to voter fields and the system will process the import.', category: 'Voters' },
+  { id: 'faq-3', question: 'How do voting passes work?', answer: 'Each voter receives a unique voting pass via email. They use this pass to authenticate and cast their ballot. Passes are single-use and cryptographically secured.', category: 'Security' },
+  { id: 'faq-4', question: 'What is the difference between roles?', answer: 'Roles control what team members can do. Organization Owners have full access, while Observers can only view results. Custom roles let you define granular permissions.', category: 'Team' },
+  { id: 'faq-5', question: 'How secure is the voting process?', answer: 'ORIVIS uses end-to-end encryption, zero-knowledge proofs, and blockchain-backed audit trails. Every ballot is anonymized and verifiable without compromising voter privacy.', category: 'Security' },
+  { id: 'faq-6', question: 'Can I customize my workspace branding?', answer: 'Yes. Go to Workspace Settings > Branding to upload your logo, set your color scheme, and choose between light and dark themes.', category: 'Workspace' },
+  { id: 'faq-7', question: 'How do I upgrade my plan?', answer: 'Navigate to Billing to view available plans. Click "Upgrade" on your desired plan. The system will handle pro-rated billing for the remainder of your cycle.', category: 'Billing' },
+  { id: 'faq-8', question: 'What happens when an event ends?', answer: 'Voting closes automatically at the scheduled end time. Results are tallied and made available immediately. Admins can publish results for public viewing.', category: 'Events' },
+]
+
+const RELEASE_NOTES: ReleaseNote[] = [
+  { id: 'rn-1', version: '2.5.0', date: 'Jul 20, 2026', title: 'Custom Roles & Enhanced Permissions', changes: ['Introducing custom role builder with granular permissions', 'New permission matrix with 8 permission groups', 'Package-aware role limits with upgrade prompts'], type: 'feature' },
+  { id: 'rn-2', version: '2.4.0', date: 'Jul 5, 2026', title: 'Audit Log Overhaul', changes: ['Redesigned audit log with severity filters', 'New global search across all audit events', 'Export audit logs to CSV'], type: 'feature' },
+  { id: 'rn-3', version: '2.3.1', date: 'Jun 28, 2026', title: 'Performance Improvements', changes: ['Optimized dashboard load times', 'Reduced memory usage on large voter imports', 'Fixed sidebar flickering on navigation'], type: 'fix' },
+  { id: 'rn-4', version: '2.3.0', date: 'Jun 15, 2026', title: 'Billing Dashboard & Package Comparison', changes: ['New billing dashboard with package comparison', 'Automatic invoice generation', 'Payment method management'], type: 'feature' },
+  { id: 'rn-5', version: '2.2.0', date: 'Jun 1, 2026', title: 'Help Center Launch', changes: ['New knowledge base with searchable articles', 'FAQ section with categorized questions', 'Release notes history'], type: 'feature' },
+  { id: 'rn-6', version: '2.1.0', date: 'May 15, 2026', title: 'Workspace Settings Redesign', changes: ['Unified settings page with sections', 'Branding customization tools', 'Notification preference controls'], type: 'improvement' },
+  { id: 'rn-7', version: '2.0.0', date: 'May 1, 2026', title: 'ORIVIS V2 Launch', changes: ['Complete UI redesign with new design system', 'Enhanced organization branding engine', 'Improved navigation and layout', 'Dark mode support'], type: 'feature' },
+]
 
 export default function OrgHelp() {
   const { branding } = useOrgBranding()
@@ -26,6 +54,39 @@ export default function OrgHelp() {
   const [search, setSearch] = useState('')
   const [selectedArticle, setSelectedArticle] = useState<HelpArticle | null>(null)
   const [expandedFaq, setExpandedFaq] = useState<string | null>(null)
+
+  const { data, loading, error, reload } = useApiResource(async () => {
+    const result = await orgService.getHelpArticles({ perPage: 100 })
+    return result.items
+  })
+
+  const HELP_ARTICLES = data ?? []
+
+  if (loading) {
+    return (
+      <>
+        <SeoHead meta={{ title: "Help & Support | ORIVIS", noindex: true }} />
+        <div className="space-y-6">
+          <div className="animate-pulse h-10 w-64 bg-brand-surface-elevated rounded-2xl" />
+          <SkeletonLoader rows={4} variant="card" />
+        </div>
+      </>
+    )
+  }
+
+  if (error) {
+    return (
+      <>
+        <SeoHead meta={{ title: "Help & Support | ORIVIS", noindex: true }} />
+        <EmptyState
+          icon={BookOpen}
+          title="Failed to load help center"
+          description={error}
+          action={{ label: 'Retry', onClick: reload }}
+        />
+      </>
+    )
+  }
 
   const filteredArticles = HELP_ARTICLES.filter((a) =>
     !search || a.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -50,7 +111,7 @@ export default function OrgHelp() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-display font-black uppercase tracking-tight" style={{ color: 'var(--org-primary)' }}>Help & Support</h1>
+          <h1 className="text-2xl font-display font-bold uppercase tracking-tight" style={{ color: 'var(--org-primary)' }}>Help & Support</h1>
           <p className="text-sm text-brand-text-muted mt-1">Find answers, browse documentation, or get in touch with our team.</p>
         </div>
         <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-brand-divider bg-brand-surface">
@@ -100,7 +161,7 @@ export default function OrgHelp() {
                 </span>
                 <span className="text-[9px] font-mono text-brand-text-muted">{selectedArticle.readTime}</span>
               </div>
-              <h2 className="text-lg font-display font-black uppercase tracking-tight text-brand-text-primary mb-2">{selectedArticle.title}</h2>
+              <h2 className="text-lg font-display font-bold uppercase tracking-tight text-brand-text-primary mb-2">{selectedArticle.title}</h2>
               <p className="text-sm text-brand-text-muted mb-6">{selectedArticle.description}</p>
               <div className="prose prose-sm max-w-none text-brand-text-secondary">
                 <p className="text-xs leading-relaxed">

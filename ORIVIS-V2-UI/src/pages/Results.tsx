@@ -197,7 +197,7 @@ export default function Results() {
           >
             <div className="flex flex-col gap-1">
               <span className="text-[10px] font-mono tracking-widest uppercase text-brand-gold font-bold">Public Verifiable Data</span>
-              <h1 className="text-3xl sm:text-4xl font-display font-black uppercase tracking-tight text-brand-text-primary">
+              <h1 className="text-3xl sm:text-4xl font-display font-bold uppercase tracking-tight text-brand-text-primary">
                 Election Results
               </h1>
               <p className="text-xs text-brand-text-muted max-w-xl mt-1">
@@ -257,7 +257,7 @@ export default function Results() {
 
             <div className="flex flex-col gap-1">
               <span className="text-[10px] font-mono tracking-widest uppercase text-brand-gold font-bold">{selectedElection.organization}</span>
-              <h1 className="text-2xl sm:text-3xl font-display font-black uppercase tracking-tight text-brand-text-primary">{selectedElection.name}</h1>
+              <h1 className="text-2xl sm:text-3xl font-display font-bold uppercase tracking-tight text-brand-text-primary">{selectedElection.name}</h1>
               <div className="flex items-center gap-4 mt-2 text-[10px] font-mono text-brand-text-muted">
                 <span className="flex items-center gap-1"><Users size={12} />{selectedElection.totalVoters.toLocaleString()} registered</span>
                 <span className="flex items-center gap-1"><TrendingUp size={12} />{selectedElection.turnout}% turnout</span>
@@ -318,7 +318,7 @@ export default function Results() {
 
             <div className="flex flex-col gap-1">
               <span className="text-[10px] font-mono tracking-widest uppercase text-brand-gold font-bold">{selectedElection.organization}</span>
-              <h1 className="text-2xl sm:text-3xl font-display font-black uppercase tracking-tight text-brand-text-primary">{selectedPosition.title}</h1>
+              <h1 className="text-2xl sm:text-3xl font-display font-bold uppercase tracking-tight text-brand-text-primary">{selectedPosition.title}</h1>
               <p className="text-xs text-brand-text-muted mt-1">
                 {selectedElection.name} &mdash; {selectedPosition.totalVotes} ballots cast
               </p>

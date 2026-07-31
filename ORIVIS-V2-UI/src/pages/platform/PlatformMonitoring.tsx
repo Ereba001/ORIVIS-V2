@@ -68,7 +68,7 @@ export default function PlatformMonitoring() {
       <Breadcrumbs items={[{ label: "Platform Health" }]} />
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-display font-black uppercase tracking-tight text-brand-text-primary">Platform Health</h1>
+          <h1 className="text-2xl font-display font-bold uppercase tracking-tight text-brand-text-primary">Platform Health</h1>
           <p className="text-sm text-brand-text-muted mt-1">Monitor infrastructure, system metrics, and incidents.</p>
         </div>
         <div className="hidden sm:flex items-center gap-2 bg-brand-surface-elevated rounded-xl px-4 py-2 border border-brand-border">

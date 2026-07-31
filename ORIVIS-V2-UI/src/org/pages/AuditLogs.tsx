@@ -7,10 +7,10 @@ import {
 import { useOrgBranding } from '../contexts/OrgBrandingContext'
 import DashboardCard from '../components/DashboardCard'
 import EmptyState from '../components/EmptyState'
-import {
-  WORKSPACE_AUDIT_LOGS, EVENT_AUDIT_LOGS, VOTING_AUDIT_LOGS,
-} from '../mock/data'
-import type { WorkspaceAuditEvent, EventAuditEvent, VotingAuditEvent } from '../types'
+import SkeletonLoader from '../components/SkeletonLoader'
+import { orgService } from '../../services/org-service'
+import { useApiResource } from '../../hooks/useApiResource'
+import type { AuditEvent } from '../types'
 import SeoHead from "../../components/SeoHead"
 
 type AuditTab = 'workspace' | 'event' | 'voting'
@@ -64,7 +64,7 @@ function formatDate(dateStr: string): string {
   return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
 }
 
-type AnyAudit = WorkspaceAuditEvent | EventAuditEvent | VotingAuditEvent
+type AnyAudit = AuditEvent
 
 export default function OrgAuditLogs() {
   const { branding } = useOrgBranding()
@@ -76,13 +76,45 @@ export default function OrgAuditLogs() {
   const [page, setPage] = useState(1)
   const perPage = 10
 
+  const { data, loading, error, reload } = useApiResource(async () => {
+    const result = await orgService.getAuditLogs({ perPage: 100 })
+    return result.items
+  })
+
   const allLogs: AnyAudit[] = useMemo(() => {
+    const logs = data ?? []
     switch (tab) {
-      case 'workspace': return WORKSPACE_AUDIT_LOGS
-      case 'event': return EVENT_AUDIT_LOGS
-      case 'voting': return VOTING_AUDIT_LOGS
+      case 'workspace': return logs.filter((e) => ['Team', 'Settings', 'Billing', 'Auth'].includes(e.module))
+      case 'event': return logs.filter((e) => ['Event', 'Candidate'].includes(e.module))
+      case 'voting': return logs.filter((e) => e.module === 'Voter' || e.action.includes('vote'))
     }
-  }, [tab])
+  }, [tab, data])
+
+  if (loading) {
+    return (
+      <>
+        <SeoHead meta={{ title: "Audit Logs — Organization | ORIVIS", noindex: true }} />
+        <div className="space-y-6">
+          <div className="animate-pulse h-10 w-64 bg-brand-surface-elevated rounded-2xl" />
+          <SkeletonLoader rows={8} variant="list" />
+        </div>
+      </>
+    )
+  }
+
+  if (error) {
+    return (
+      <>
+        <SeoHead meta={{ title: "Audit Logs — Organization | ORIVIS", noindex: true }} />
+        <EmptyState
+          icon={Shield}
+          title="Failed to load audit logs"
+          description={error}
+          action={{ label: 'Retry', onClick: reload }}
+        />
+      </>
+    )
+  }
 
   const filtered = allLogs.filter((event) => {
     if (severityFilter !== 'all' && event.severity !== severityFilter) return false
@@ -122,7 +154,7 @@ export default function OrgAuditLogs() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-display font-black uppercase tracking-tight" style={{ color: 'var(--org-primary)' }}>Audit Log</h1>
+          <h1 className="text-2xl font-display font-bold uppercase tracking-tight" style={{ color: 'var(--org-primary)' }}>Audit Log</h1>
           <p className="text-sm text-brand-text-muted mt-1">Track all administrative actions within your organization.</p>
         </div>
         <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all text-white"
@@ -222,11 +254,6 @@ export default function OrgAuditLogs() {
                             <span className="inline-flex items-center gap-1 text-[9px] font-mono text-brand-text-muted border border-brand-divider rounded px-1.5 py-0.5">
                               <ModIcon size={8} />{event.module}
                             </span>
-                            {'eventId' in event && event.eventId && (
-                              <span className="text-[9px] font-mono text-brand-text-muted border border-brand-divider rounded px-1.5 py-0.5">
-                                {event.eventId}
-                              </span>
-                            )}
                             <span className={`text-[9px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full border ${SEVERITY_STYLES[event.severity]}`}>
                               {event.severity}
                             </span>
