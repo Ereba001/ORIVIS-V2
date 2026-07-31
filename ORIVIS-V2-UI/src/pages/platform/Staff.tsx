@@ -531,7 +531,7 @@ export default function PlatformStaff() {
                       <input
                         value={inviteForm.name}
                         onChange={e => setInviteForm(f => ({ ...f, name: e.target.value }))}
-                        placeholder="e.g. Jane Doe"
+                        placeholder="Enter the staff member's full name"
                         className="w-full bg-brand-bg-secondary/50 border border-brand-border rounded-xl px-3.5 py-2.5 text-xs text-brand-text-primary placeholder-brand-text-disabled focus:outline-none focus:border-brand-gold transition-all"
                       />
                     </div>
@@ -540,7 +540,7 @@ export default function PlatformStaff() {
                       <input
                         value={inviteForm.email}
                         onChange={e => setInviteForm(f => ({ ...f, email: e.target.value }))}
-                        placeholder="e.g. jane@orivis.io"
+                        placeholder="Enter their work email address"
                         type="email"
                         className="w-full bg-brand-bg-secondary/50 border border-brand-border rounded-xl px-3.5 py-2.5 text-xs text-brand-text-primary placeholder-brand-text-disabled focus:outline-none focus:border-brand-gold transition-all"
                       />

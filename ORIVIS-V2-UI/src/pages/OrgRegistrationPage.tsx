@@ -8,6 +8,8 @@ import AuthHeroIllustration from "../components/auth/AuthHeroIllustration";
 import { AuthCard, AuthStateCard, AuthFormWrapper } from "../components/auth/AuthCard";
 import PasswordField from "../components/auth/PasswordField";
 import PhoneInput from "../components/PhoneInput";
+import SearchableSelect from "../components/SearchableSelect";
+import { COUNTRY_OPTIONS, COUNTRY_STATES } from "../constants/countries";
 
 type OrgStep = "details" | "branding" | "review" | "submitting" | "success";
 
@@ -63,13 +65,6 @@ const CATEGORIES = [
   "Professional Association",
   "Trade Union / Labor",
   "Community Organization",
-  "Other",
-];
-
-const COUNTRIES = [
-  "Nigeria", "Ghana", "Kenya", "South Africa", "Uganda", "Tanzania",
-  "Ethiopia", "Rwanda", "Senegal", "Côte d'Ivoire",
-  "United Kingdom", "United States", "Canada", "India",
   "Other",
 ];
 
@@ -195,14 +190,14 @@ export default function OrgRegistrationPage() {
                   <div className="grid grid-cols-2 gap-3">
                     <div className="col-span-2 sm:col-span-1">
                       <label className="block text-[10px] font-mono uppercase tracking-wider text-brand-text-muted font-bold mb-1">Organization Name</label>
-                      <input type="text" required placeholder="e.g. University of Lagos" value={formData.organizationName}
+                      <input type="text" required placeholder="Use your organization's official registered name" value={formData.organizationName}
                         onChange={(e) => updateField("organizationName", e.target.value)}
                         className={`w-full bg-brand-bg-secondary/50 border ${errors.organizationName ? "border-status-danger" : "border-brand-border"} rounded-xl px-4 py-2.5 text-xs text-brand-text-primary placeholder-brand-text-disabled focus:outline-none focus:border-brand-gold focus:bg-brand-surface transition-all font-medium`} />
                       {errors.organizationName && <p className="text-[10px] text-status-danger mt-1 font-semibold">{errors.organizationName}</p>}
                     </div>
                     <div className="col-span-2 sm:col-span-1">
                       <label className="block text-[10px] font-mono uppercase tracking-wider text-brand-text-muted font-bold mb-1">Short Name</label>
-                      <input type="text" required placeholder="e.g. UNILAG" maxLength={15} value={formData.shortName}
+                      <input type="text" required placeholder="Short name your members recognize (max 15 characters)" maxLength={15} value={formData.shortName}
                         onChange={(e) => updateField("shortName", e.target.value.toUpperCase())}
                         className={`w-full bg-brand-bg-secondary/50 border ${errors.shortName ? "border-status-danger" : "border-brand-border"} rounded-xl px-4 py-2.5 text-xs text-brand-text-primary placeholder-brand-text-disabled focus:outline-none focus:border-brand-gold focus:bg-brand-surface transition-all font-medium uppercase`} />
                       {errors.shortName && <p className="text-[10px] text-status-danger mt-1 font-semibold">{errors.shortName}</p>}
@@ -223,7 +218,7 @@ export default function OrgRegistrationPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="block text-[10px] font-mono uppercase tracking-wider text-brand-text-muted font-bold mb-1">Contact Email</label>
-                      <input type="email" required placeholder="org@domain.com" value={formData.contactEmail}
+                      <input type="email" required placeholder="Use your organization's official email address" value={formData.contactEmail}
                         onChange={(e) => updateField("contactEmail", e.target.value)}
                         className={`w-full bg-brand-bg-secondary/50 border ${errors.contactEmail ? "border-status-danger" : "border-brand-border"} rounded-xl px-4 py-2.5 text-xs text-brand-text-primary placeholder-brand-text-disabled focus:outline-none focus:border-brand-gold focus:bg-brand-surface transition-all font-medium`} />
                       {errors.contactEmail && <p className="text-[10px] text-status-danger mt-1 font-semibold">{errors.contactEmail}</p>}
@@ -244,17 +239,22 @@ export default function OrgRegistrationPage() {
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-[10px] font-mono uppercase tracking-wider text-brand-text-muted font-bold mb-1">Website</label>
-                      <input type="url" placeholder="https://example.com" value={formData.website}
+                      <input type="url" placeholder="Paste your organization's website URL (if any)" value={formData.website}
                         onChange={(e) => updateField("website", e.target.value)}
                         className="w-full bg-brand-bg-secondary/50 border border-brand-border rounded-xl px-4 py-2.5 text-xs text-brand-text-primary placeholder-brand-text-disabled focus:outline-none focus:border-brand-gold focus:bg-brand-surface transition-all font-medium" />
                     </div>
                     <div>
                       <label className="block text-[10px] font-mono uppercase tracking-wider text-brand-text-muted font-bold mb-1">Country</label>
                       <select required value={formData.country}
-                        onChange={(e) => updateField("country", e.target.value)}
+                        onChange={(e) => {
+                          updateField("country", e.target.value)
+                          if (!(COUNTRY_STATES[e.target.value] ?? []).includes(formData.stateRegion)) {
+                            updateField("stateRegion", "")
+                          }
+                        }}
                         className={`w-full bg-brand-bg-secondary/50 border ${errors.country ? "border-status-danger" : "border-brand-border"} rounded-xl px-4 py-2.5 text-xs text-brand-text-primary focus:outline-none focus:border-brand-gold focus:bg-brand-surface transition-all`}>
                         <option value="">Select country</option>
-                        {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                        {COUNTRY_OPTIONS.map((c) => <option key={c} value={c}>{c}</option>)}
                       </select>
                       {errors.country && <p className="text-[10px] text-status-danger mt-1 font-semibold">{errors.country}</p>}
                     </div>
@@ -262,9 +262,22 @@ export default function OrgRegistrationPage() {
 
                   <div>
                     <label className="block text-[10px] font-mono uppercase tracking-wider text-brand-text-muted font-bold mb-1">State / Region</label>
-                    <input type="text" placeholder="e.g. Lagos" value={formData.stateRegion}
-                      onChange={(e) => updateField("stateRegion", e.target.value)}
-                      className="w-full bg-brand-bg-secondary/50 border border-brand-border rounded-xl px-4 py-2.5 text-xs text-brand-text-primary placeholder-brand-text-disabled focus:outline-none focus:border-brand-gold focus:bg-brand-surface transition-all font-medium" />
+                    {COUNTRY_STATES[formData.country]?.length ? (
+                      <SearchableSelect
+                        options={COUNTRY_STATES[formData.country].map((s) => ({ value: s, label: s }))}
+                        value={formData.stateRegion}
+                        onChange={(v) => updateField("stateRegion", v)}
+                        placeholder="Select state / region"
+                      />
+                    ) : (
+                      <input
+                        type="text"
+                        placeholder={formData.country ? "Enter your state / region" : "Select a country first to see available states"}
+                        value={formData.stateRegion}
+                        onChange={(e) => updateField("stateRegion", e.target.value)}
+                        className="w-full bg-brand-bg-secondary/50 border border-brand-border rounded-xl px-4 py-2.5 text-xs text-brand-text-primary placeholder-brand-text-disabled focus:outline-none focus:border-brand-gold focus:bg-brand-surface transition-all font-medium"
+                      />
+                    )}
                   </div>
 
                   <div className="pt-4 border-t border-brand-border">
@@ -402,7 +415,7 @@ export default function OrgRegistrationPage() {
                         <span className="text-[8px] font-mono uppercase tracking-wider text-brand-text-muted">or paste URL</span>
                         <div className="flex-1 h-px bg-brand-border" />
                       </div>
-                      <input type="text" placeholder="https://example.com/logo.png" value={formData.logoUrl}
+                      <input type="text" placeholder="Paste a direct link to your logo image" value={formData.logoUrl}
                         onChange={(e) => {
                           updateField("logoUrl", e.target.value)
                           if (e.target.value) updateField("logoFile", null)

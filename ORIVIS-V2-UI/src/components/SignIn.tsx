@@ -95,7 +95,7 @@ export default function SignIn({ onSuccess, variant, compact }: SignInProps) {
             id="email"
             type="email"
             required
-            placeholder="you@organization.com"
+            placeholder="Enter your registered email address"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full bg-brand-bg-secondary/50 border border-brand-border rounded-xl px-4 py-3 text-xs text-brand-text-primary placeholder-brand-text-disabled focus:outline-none focus:border-brand-gold focus:bg-brand-surface transition-all font-medium"

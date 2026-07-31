@@ -88,7 +88,7 @@ export default function SignUpPage() {
               id="fullName"
               type="text"
               required
-              placeholder="John Doe"
+              placeholder="Enter your full name"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               className={`w-full bg-brand-bg-secondary/50 border ${fieldErrors.fullName ? "border-status-danger" : "border-brand-border"} rounded-xl px-4 py-2.5 text-xs text-brand-text-primary placeholder-brand-text-disabled focus:outline-none focus:border-brand-gold focus:bg-brand-surface transition-all font-medium`}
@@ -104,7 +104,7 @@ export default function SignUpPage() {
               id="email"
               type="email"
               required
-              placeholder="you@organization.com"
+              placeholder="Enter your organization email address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className={`w-full bg-brand-bg-secondary/50 border ${fieldErrors.email ? "border-status-danger" : "border-brand-border"} rounded-xl px-4 py-2.5 text-xs text-brand-text-primary placeholder-brand-text-disabled focus:outline-none focus:border-brand-gold focus:bg-brand-surface transition-all font-medium`}

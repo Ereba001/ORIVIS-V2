@@ -10,7 +10,7 @@ const FIELD_LABELS: Record<VoterLookupField, { label: string; placeholder: strin
   membership_number: { label: "Membership Number", placeholder: "e.g. MEM-001", type: "text" },
   external_id: { label: "External ID", placeholder: "Enter your ID", type: "text" },
   voter_id: { label: "Voter ID", placeholder: "e.g. VTR-001", type: "text" },
-  email: { label: "Email Address", placeholder: "you@example.com", type: "email" },
+  email: { label: "Email Address", placeholder: "Enter your email address", type: "email" },
   phone: { label: "Phone Number", placeholder: "+234 800 000 0000", type: "tel" },
   name: { label: "Full Name", placeholder: "Enter your full name", type: "text" },
   surname: { label: "Surname", placeholder: "Enter your surname", type: "text" },

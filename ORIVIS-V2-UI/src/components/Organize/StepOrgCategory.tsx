@@ -1,7 +1,7 @@
 import { motion } from "motion/react"
 import { useMemo } from "react"
 import SearchableSelect from "../SearchableSelect"
-import { COUNTRY_OPTIONS } from "../../constants/countries"
+import { COUNTRY_OPTIONS, COUNTRY_STATES } from "../../constants/countries"
 import {
   type OrganizePhase1,
   type OrgSubType,
@@ -111,10 +111,50 @@ export default function StepOrgCategory({ data, onChange, onNext, errors }: Prop
           id="country"
           options={COUNTRY_OPTIONS.map((c) => ({ value: c, label: c }))}
           value={data.country}
-          onChange={(v) => update("country", v)}
+          onChange={(v) => {
+            onChange({ ...data, country: v, state: '', city: '' })
+          }}
           placeholder="Select your country of operation"
         />
         {errors.country && <p className="text-status-error text-[10px] mt-1">{errors.country}</p>}
+      </div>
+
+      <div>
+        <label htmlFor="state" className="block text-[10px] font-mono uppercase tracking-wider text-brand-text-muted font-bold mb-1.5">
+          State / Region
+        </label>
+        {COUNTRY_STATES[data.country]?.length ? (
+          <SearchableSelect
+            id="state"
+            options={COUNTRY_STATES[data.country].map((s) => ({ value: s, label: s }))}
+            value={data.state}
+            onChange={(v) => update("state", v)}
+            placeholder="Select your state / region"
+          />
+        ) : (
+          <input
+            id="state"
+            type="text"
+            value={data.state}
+            onChange={(e) => update("state", e.target.value)}
+            placeholder={data.country ? "Enter your state / region" : "Select a country first to see available states"}
+            className="w-full bg-brand-bg-secondary/50 border border-brand-border rounded-xl px-4 py-3 text-xs text-brand-text-primary placeholder-brand-text-disabled focus:outline-none focus:border-brand-gold focus:bg-brand-surface transition-all font-medium"
+          />
+        )}
+      </div>
+
+      <div>
+        <label htmlFor="city" className="block text-[10px] font-mono uppercase tracking-wider text-brand-text-muted font-bold mb-1.5">
+          City
+        </label>
+        <input
+          id="city"
+          type="text"
+          value={data.city}
+          onChange={(e) => update("city", e.target.value)}
+          placeholder="Enter your city / town"
+          className="w-full bg-brand-bg-secondary/50 border border-brand-border rounded-xl px-4 py-3 text-xs text-brand-text-primary placeholder-brand-text-disabled focus:outline-none focus:border-brand-gold focus:bg-brand-surface transition-all font-medium"
+        />
       </div>
 
       <div>

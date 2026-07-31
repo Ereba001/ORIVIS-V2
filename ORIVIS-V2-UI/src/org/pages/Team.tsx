@@ -438,7 +438,7 @@ export default function OrgTeam() {
                 </div>
                 <div>
                   <label className="block text-[10px] font-mono uppercase tracking-wider text-brand-text-muted font-bold mb-1.5">Email Address</label>
-                  <input placeholder="colleague@organization.com"
+                  <input placeholder="Enter their work email address"
                     className="w-full bg-brand-bg-secondary/50 border border-brand-border rounded-xl px-4 py-3 text-xs text-brand-text-primary placeholder-brand-text-disabled focus:outline-none transition-all" />
                 </div>
                 <div>
@@ -493,7 +493,7 @@ export default function OrgTeam() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-[10px] font-mono uppercase tracking-wider text-brand-text-muted font-bold mb-1.5">Role Name</label>
-                  <input defaultValue={editingRole?.name || ''} placeholder="e.g. Department Head"
+                  <input defaultValue={editingRole?.name || ''} placeholder="Name this role (e.g. Election Manager)"
                     className="w-full bg-brand-bg-secondary/50 border border-brand-border rounded-xl px-4 py-3 text-xs text-brand-text-primary placeholder-brand-text-disabled focus:outline-none transition-all" />
                 </div>
                 <div>
